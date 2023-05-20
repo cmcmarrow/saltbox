@@ -1,0 +1,4 @@
+
+
+class SaltBoxException(Exception):
+    pass
