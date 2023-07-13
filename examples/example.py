@@ -1,6 +1,8 @@
 from saltbox.utils.file import FileBridge, FileData
 from saltbox import saltbox
 from saltbox.orchestration import Orchestration
+from saltbox import saltidle
+
 
 APACHE = """
 apache:
@@ -31,3 +33,4 @@ with Orchestration([(1, saltbox.SaltBoxBuilder("docker",
     print(d["minion_old_1"].run("salt-call --local test.ping").output)
     print(d["build_master"].run("salt '*' state.apply a").output)
     print(d["build_master"].run("ls srv/salt").output)
+    saltidle.run(d)

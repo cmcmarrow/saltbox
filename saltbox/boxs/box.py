@@ -51,5 +51,5 @@ class Box(ABC):
     def box_builder(self) -> BoxBuilder:
         return self._box_builder
 
-    def run(self, command: str, detach: bool = False, encoding: str = "utf-8") -> Optional[CommandReturn]:
+    def run(self, command: str, detach: bool = False, encoding: str = "utf-8", hard_fail: bool = False) -> Optional[CommandReturn]:
         raise NotImplemented()
