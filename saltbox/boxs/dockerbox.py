@@ -1,5 +1,6 @@
 from . import box
 from saltbox.utils import file
+from saltbox import error
 from logging import getLogger
 
 LOG = getLogger("salt-box")
@@ -58,12 +59,24 @@ class DockerBox(box.Box):
                 docker_env.images.remove(self._box_builder.tag, force=True)
         super().close()
 
-    def run(self, command: str, detach: bool = False, encoding: str = "utf-8"):
+    def run(self, command: str, detach: bool = False, encoding: str = "utf-8", hard_fail: bool = False):
         LOG.debug(f"Docker: Running command {repr(command)}")
-        ret = self._container.exec_run(command, detach=detach)
-        if detach is True:
-            return
-        output = ret.output
+        try:
+            ret = self._container.exec_run(command, detach=detach)
+            if detach is True:
+                return
+            output = ret.output
+            exit_code = ret.exit_code
+        except (docker.errors.APIError,) as e:
+            if hard_fail:
+                raise error.SaltBoxException(e)
+            if detach is True:
+                return
+            if encoding is None:
+                output = bytes(str(e), encoding="utf-8")
+            else:
+                output = bytes(str(e), encoding=encoding)
+            exit_code = 0
         if encoding is not None:
             output = str(output, encoding)
-        return box.CommandReturn(output, ret.exit_code)
+        return box.CommandReturn(output, exit_code)
